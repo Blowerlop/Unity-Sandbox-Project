@@ -20,6 +20,9 @@ namespace StarterAssets
 		public bool cursorLocked = true;
 		public bool cursorInputForLook = true;
 
+
+		public bool isShooting = false;
+
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 		public void OnMove(InputValue value)
 		{
@@ -43,6 +46,11 @@ namespace StarterAssets
 		{
 			SprintInput(value.isPressed);
 		}
+
+		public void OnFire(InputValue value)
+        {
+			isShooting = value.isPressed;
+        }
 #endif
 
 
