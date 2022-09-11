@@ -230,7 +230,7 @@ public class PlayerController : MonoBehaviour
 		return Mathf.Clamp(lfAngle, lfMin, lfMax);
 	}
 
-	private void OnDrawGizmosSelected()
+	private void OnDrawGizmos()
 	{
 		Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
 		Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
@@ -241,6 +241,5 @@ public class PlayerController : MonoBehaviour
 		// when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
 		Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
 	}
-	
 }
 

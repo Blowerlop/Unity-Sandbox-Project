@@ -8,8 +8,9 @@ public class InputManager : MonoBehaviour
     // Variables
     public Vector2 move;
     public Vector2 look;
-    public bool isSprinting = false;
     public bool isJumping = false;
+    public bool isSprinting = false;
+    public bool isFiring = false;
 
 
 
@@ -25,8 +26,18 @@ public class InputManager : MonoBehaviour
         
     }
 
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        isJumping = context.performed;
+    }
+
+    public void OnSprint(InputAction.CallbackContext context)
+    {
+        isSprinting = context.performed;
+    }
+
     public void OnFire(InputAction.CallbackContext context)
     {
-        if (context.performed) { Debug.Log("Fire"); }
+        isFiring = context.performed;
     }
 }
