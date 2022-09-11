@@ -5,122 +5,131 @@ using UnityEngine;
 
 public class PlayerGrabObjets : MonoBehaviour
 {
-    private Transform _camTransform;
-    [SerializeField] private LayerMask _grabbableMask;
-    [SerializeField] private float _grabbingDistance = 2.0f;
+    #region Variables
+
+    [Header("Grabbling relative")]
+    [Tooltip("The point where you grabbed object will position")]
     [SerializeField] private Transform _grabPoint;
-
-    private bool _isTryingToGrab = false;
-    private Rigidbody _grabTarget;
-
-    private float _dragForce = 10.0f;
-    private float _defaultDragForce;
-    private float _angularDragForce = 10.0f;
-    private float _defaultAngularDragForce;
+    [SerializeField] private float _grabbingDistance = 2.0f;
+    [SerializeField] private LayerMask _grabbableMask;
+    private Rigidbody _grabbedTarget;
+    
+    [Header("Drop Force")]
+    [Tooltip("Force that you put on the grabbed object when you drop it")]
     [SerializeField] private float _dropForce = 5.0f;
 
+    // Grabbed Target velocity relative
+    private Vector3 _velocityOffset = new Vector3(0.1f, 0.1f, 0.1f);
+    private Vector3 _angularVelocityOffset = new Vector3(0.1f, 0.1f, 0.1f);
+
+    [Header("Links")]
+    [SerializeField] private Transform _camera;
+    [SerializeField] private GameObject _grabUI;
+    private InputManager _inputManager;
+    #endregion
+
+
+    #region Updates
     private void Start()
     {
-        _camTransform = Camera.main.transform;
+        _inputManager = GetComponent<InputManager>();
+        _grabUI.SetActive(false);
     }
 
     private void Update()
     {
-        // FAIRE APPARAITRE UI --> GRAB THE OBJECT
-
-
-        if (_isTryingToGrab)
+        if (_grabbedTarget == null)
         {
-            if (_grabTarget == null)
+            if (Physics.Raycast(_camera.position, _camera.forward, out RaycastHit hit, _grabbingDistance, _grabbableMask))
             {
-                if (Physics.Raycast(_camTransform.position, _camTransform.forward, out RaycastHit hit, _grabbingDistance, _grabbableMask))
+                EnableGrabUI(true);
+                if (_inputManager.isUsing)
                 {
                     Grab(hit);
                 }
             }
             else
             {
+                EnableGrabUI(false);
+            }
+        }
+        else
+        {
+            if (_inputManager.isUsing)
+            {
                 Drop();
             }
-
-            _isTryingToGrab = false;
         }
-
-        
+        _inputManager.isUsing = false;       
     }
-
 
     private void FixedUpdate()
     {
-        if (_grabTarget != null)
+        if (_grabbedTarget != null)
         {
-            Vector3 targetPosition = Vector3.Lerp(_grabTarget.position, _grabPoint.position, Time.fixedDeltaTime * 10);
-            _grabTarget.MovePosition(targetPosition);
-
-            // A MODIFIER --> CHECK SI BON
-            Vector3 velocity = _grabTarget.velocity;
-            Vector3 angularVelocity = _grabTarget.angularVelocity;
-
-            Vector3 newObjectVelocity = Vector3.zero;
-            Vector3 newObjectAngularVelocity = Vector3.zero;
-
-            if (velocity.normalized != Vector3.zero)
-            {
-                newObjectVelocity = Vector3.Lerp(_grabTarget.velocity, Vector3.zero, Time.deltaTime * 10.0f);
-            }
-            if (angularVelocity.normalized != Vector3.zero)
-            {
-                newObjectAngularVelocity = Vector3.Lerp(_grabTarget.angularVelocity, Vector3.zero, Time.deltaTime * 10.0f);
-
-            }
-
-            _grabTarget.velocity = newObjectVelocity;
-            _grabTarget.angularVelocity = newObjectAngularVelocity;
-
-            //
-        }
+            MoveGrabbedTarget();
+        }  
     }
+    #endregion
 
 
-
-    public void OnGrab(InputValue value)
-    {
-        _isTryingToGrab = value.isPressed;
-    }
-
-
+    #region Methods
     private void Grab(RaycastHit hit)
     {
-        _grabTarget = hit.transform.GetComponent<Rigidbody>();
-        _grabTarget.useGravity = false;
-        //
-        
-  
-        //
-        //
-        //_defaultDragForce = _grabTarget.drag;
-        //_defaultAngularDragForce = _grabTarget.angularDrag;
+        _grabbedTarget = hit.transform.GetComponent<Rigidbody>();
 
-        //_grabTarget.drag = _angularDragForce;
-        //_grabTarget.angularDrag = _angularDragForce;
-        //////////////
-        _grabTarget.collisionDetectionMode = CollisionDetectionMode.Continuous;
-        _grabTarget.interpolation = RigidbodyInterpolation.Interpolate;
+        _grabbedTarget.useGravity = false;
+        _grabbedTarget.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        _grabbedTarget.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
     private void Drop()
     {
-        _grabTarget.useGravity = true;
-        //
-        
-        //_grabTarget.drag = _defaultDragForce;
-        //_grabTarget.angularDrag = _defaultAngularDragForce;
-        //
-        _grabTarget.collisionDetectionMode = CollisionDetectionMode.Discrete;
-        _grabTarget.interpolation = RigidbodyInterpolation.None;
-        _grabTarget.AddForce(_camTransform.forward * _dropForce, ForceMode.Impulse);
+        _grabbedTarget.useGravity = true;
+        _grabbedTarget.collisionDetectionMode = CollisionDetectionMode.Discrete;
+        _grabbedTarget.interpolation = RigidbodyInterpolation.None;
+        _grabbedTarget.AddForce(_camera.forward * _dropForce, ForceMode.Impulse);
 
-        _grabTarget = null;
-
+        _grabbedTarget = null;
     }
+
+    private void MoveGrabbedTarget()
+    {
+        Vector3 targetPosition = Vector3.Lerp(_grabbedTarget.position, _grabPoint.position, Time.fixedDeltaTime * 10);
+
+        Vector3 velocity = _grabbedTarget.velocity;
+        Vector3 angularVelocity = _grabbedTarget.angularVelocity;
+
+
+        if (velocity.normalized != Vector3.zero + _velocityOffset)
+        {
+            velocity = Vector3.Lerp(_grabbedTarget.velocity, Vector3.zero, Time.deltaTime * 10.0f);
+        }
+        else
+        {
+            velocity = Vector3.zero;
+        }
+
+        if (angularVelocity.normalized != Vector3.zero + _angularVelocityOffset)
+        {
+            angularVelocity = Vector3.Lerp(_grabbedTarget.angularVelocity, Vector3.zero, Time.deltaTime * 10.0f);
+
+        }
+        else
+        {
+            angularVelocity = Vector3.zero;
+        }
+
+
+        _grabbedTarget.velocity = velocity;
+        _grabbedTarget.angularVelocity = angularVelocity;
+
+        _grabbedTarget.MovePosition(targetPosition);
+    }
+
+    private void EnableGrabUI(bool state)
+    {
+        _grabUI.SetActive(state);
+    }
+    #endregion
 }

@@ -11,6 +11,7 @@ public class InputManager : MonoBehaviour
     public bool isJumping = false;
     public bool isSprinting = false;
     public bool isFiring = false;
+    public bool isUsing = false;
 
 
 
@@ -28,7 +29,7 @@ public class InputManager : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        isJumping = context.performed;
+        isJumping = context.started;
     }
 
     public void OnSprint(InputAction.CallbackContext context)
@@ -39,5 +40,10 @@ public class InputManager : MonoBehaviour
     public void OnFire(InputAction.CallbackContext context)
     {
         isFiring = context.performed;
+    }
+
+    public void OnUse(InputAction.CallbackContext context)
+    {
+        isUsing = context.started;
     }
 }
