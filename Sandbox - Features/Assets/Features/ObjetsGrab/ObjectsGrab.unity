@@ -978,7 +978,7 @@ PrefabInstance:
     - target: {fileID: 4073584703361057574, guid: 1a00256b5f61b72439485abe0133b148,
         type: 3}
       propertyPath: m_Name
-      value: Main Camera (1)
+      value: Main Camera
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1a00256b5f61b72439485abe0133b148, type: 3}
@@ -1471,7 +1471,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   _dropForce: 5
-  _camera: {fileID: 0}
+  _camera: {fileID: 982743320}
   _grabUI: {fileID: 129669825}
 --- !u!114 &2018460388 stripped
 MonoBehaviour:
