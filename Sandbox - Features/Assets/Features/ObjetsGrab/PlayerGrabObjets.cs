@@ -25,14 +25,12 @@ public class PlayerGrabObjets : MonoBehaviour
     [Header("Links")]
     [SerializeField] private Transform _camera;
     [SerializeField] private GameObject _grabUI;
-    private InputManager _inputManager;
     #endregion
 
 
     #region Updates
     private void Start()
     {
-        _inputManager = GetComponent<InputManager>();
         _grabUI.SetActive(false);
     }
 
@@ -43,7 +41,7 @@ public class PlayerGrabObjets : MonoBehaviour
             if (Physics.Raycast(_camera.position, _camera.forward, out RaycastHit hit, _grabbingDistance, _grabbableMask))
             {
                 EnableGrabUI(true);
-                if (_inputManager.isUsing)
+                if (InputManager.instance.isUsing)
                 {
                     Grab(hit);
                 }
@@ -55,12 +53,12 @@ public class PlayerGrabObjets : MonoBehaviour
         }
         else
         {
-            if (_inputManager.isUsing)
+            if (InputManager.instance.isUsing)
             {
                 Drop();
             }
         }
-        _inputManager.isUsing = false;       
+        InputManager.instance.isUsing = false;       
     }
 
     private void FixedUpdate()

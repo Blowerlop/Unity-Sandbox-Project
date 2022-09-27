@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Features/ThirdPersonController/ThirdPersonController.unity
-    guid: 00d586af40c175842a44499aa38d09f8
+    path: Assets/Features/GridSystem/GridSystem.unity
+    guid: f024e9f584d8b93488f86036ed788e4b
   m_configObjects: {}

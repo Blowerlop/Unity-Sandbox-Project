@@ -1,17 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
     // Variables
+    public static InputManager instance;
+
+    public void Start()
+    {
+        instance = this;
+    }
+
     public Vector2 move;
     public Vector2 look;
     public bool isJumping = false;
     public bool isSprinting = false;
     public bool isFiring = false;
     public bool isUsing = false;
+    public Vector3 mousePosition;
 
 
 
@@ -45,5 +52,11 @@ public class InputManager : MonoBehaviour
     public void OnUse(InputAction.CallbackContext context)
     {
         isUsing = context.started;
+    }
+
+    public void OnMousePosition(InputAction.CallbackContext context)
+    {
+        Vector2 position2D = context.ReadValue<Vector2>();
+        mousePosition = new Vector3(position2D.x, position2D.y, 0);
     }
 }
