@@ -10,32 +10,28 @@ using Vector3 = UnityEngine.Vector3;
 public class Grid : MonoBehaviour
 {
     #region Variables
-    
+
     private int[,] _gridArray;
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     private TextMesh[,] _gridText;
-    #endif
+#endif
 
-    private Vector3 _originPosition;
-
-    private Vector2 _currentSelectedCellIndexes;
-    private Camera _cam;
-    [SerializeField] private LayerMask _gridLayerMask;
-
-
-    private Plane _plane;
 
     [SerializeField] private bool _drawGizmos;
 
-
-    [Header("Grid Relative")]
+    [Header("Grid Relative")] // CHOISIR AVEC GRID NORMAL
     [SerializeField] [Min(1)] private int _width = 7;
 
     [SerializeField] [Min(1)] private int _depth = 10;
 
 
-    [Header("Cell Relative")]
+    [Header("Cell")]
     [SerializeField] [Min(1)] private Vector3 _size;
+
+    private Vector3 _gridOriginPosition;
+    private Vector2 _currentSelectedCellIndexes;
+    private Camera _cam;
+    private Plane _plane;
 
     #endregion
 
@@ -44,23 +40,10 @@ public class Grid : MonoBehaviour
 
     private void Start()
     {
-        _originPosition = transform.position;
-        _plane = new Plane(Vector3.up, _originPosition);
+        _gridOriginPosition = transform.position;
+        _plane = new Plane(Vector3.up, _gridOriginPosition);
         _cam = Camera.main;
         InitializeAllGridRelative();
-    }
-
-    void Update()
-    {
-        // Ray ray = _cam.ScreenPointToRay(InputManager.instance.mousePosition);
-        //
-        // if (_plane.Raycast(ray, out float distance))
-        // {
-        //     Vector3 mouseWorldPosition = ray.GetPoint(distance);
-        //     
-        //     GetCellIndexes(mouseWorldPosition, out int x, out int z);
-        //     _currentSelectedCellIndexes = new Vector2(x, z);
-        // }
     }
 
     #endregion
@@ -103,7 +86,8 @@ public class Grid : MonoBehaviour
             for (int z = 0; z < _gridArray.GetLength(1); z++)
             {
                 Vector3 cellPosition = new Vector3(x, 0, z);
-                cellPosition = Vector3.Scale(cellPosition, _size) + new Vector3(_originPosition.x, _originPosition.y, _originPosition.z);
+                cellPosition = Vector3.Scale(cellPosition, _size) + // Adjust to the grid origin position
+                               new Vector3(_gridOriginPosition.x, _gridOriginPosition.y, _gridOriginPosition.z);
                 yield return cellPosition;
             }
         }
@@ -118,14 +102,15 @@ public class Grid : MonoBehaviour
     private Vector3 GetCellWorldPosition(int x, int z)
     {   
         Vector3 cellPosition = new Vector3(x, 0, z);
-        cellPosition = Vector3.Scale(cellPosition, _size) + new Vector3(_originPosition.x, _originPosition.y, _originPosition.z);
+        cellPosition = Vector3.Scale(cellPosition, _size) + // Adjust to the grid origin position
+                       new Vector3(_gridOriginPosition.x, _gridOriginPosition.y, _gridOriginPosition.z);
         return cellPosition;
     }
 
     private void GetCellIndexes(Vector3 worldPosition, out int x, out int z)
     {
-        x = Mathf.FloorToInt(worldPosition.x / _size.x - _originPosition.x / _size.x) ;
-        z = Mathf.FloorToInt(worldPosition.z / _size.z - _originPosition.z / _size.z) ;
+        x = Mathf.FloorToInt(worldPosition.x / _size.x - _gridOriginPosition.x / _size.x) ;
+        z = Mathf.FloorToInt(worldPosition.z / _size.z - _gridOriginPosition.z / _size.z) ;
     }
 
     public bool IsCurrentCellOnGrid()
@@ -138,7 +123,6 @@ public class Grid : MonoBehaviour
 
     private void CheckCurrentCell()
     {
-        
         Ray ray = _cam.ScreenPointToRay(InputManager.instance.mousePosition);
         
         if (_plane.Raycast(ray, out float distance))
@@ -157,7 +141,7 @@ public class Grid : MonoBehaviour
         
         GenerateGrids();
         
-        _originPosition = transform.position;
+        _gridOriginPosition = transform.position;
 
         // Draw Gizmos Cells
         foreach (var cellPosition in EvaluateCellsWorldPosition())
@@ -166,24 +150,27 @@ public class Grid : MonoBehaviour
             Gizmos.DrawLine(cellPosition, new Vector3(cellPosition.x, cellPosition.y, cellPosition.z + _size.z));
         }
 
+        // Draw Gizmos top and right borders
         float x, y, z;
         // x origin
-        x = _width * _size.z + _originPosition.x;
-        z = _depth * _size.x + _originPosition.z;
+        x = _width * _size.z + _gridOriginPosition.x;
+        z = _depth * _size.x + _gridOriginPosition.z;
         Gizmos.DrawLine(
-            new Vector3(x, _originPosition.y, _originPosition.z), 
-            new Vector3(x, _originPosition.y, z)
+            new Vector3(x, _gridOriginPosition.y, _gridOriginPosition.z), 
+            new Vector3(x, _gridOriginPosition.y, z)
             );
 
         // z origin
         Gizmos.DrawLine(
-            new Vector3(x, _originPosition.y, z), 
-            new Vector3(_originPosition.x, _originPosition.y, z) 
+            new Vector3(x, _gridOriginPosition.y, z), 
+            new Vector3(_gridOriginPosition.x, _gridOriginPosition.y, z) 
             );
         
         // Move the plane to fit the grid and fix the cells indexes detections
-        _plane.SetNormalAndPosition(Vector3.up, new Vector3(0, _originPosition.y, 0));
-        
+        _plane.SetNormalAndPosition(Vector3.up, new Vector3(0, _gridOriginPosition.y, 0));
+
+        // Draw where the mouse is
+        if (Application.isPlaying == false) return;
         if (IsCurrentCellOnGrid() && InputManager.instance.isFiring)
         {
             x = GetCurrentSelectedCellWorldPosition().x + (_size.x / 2);

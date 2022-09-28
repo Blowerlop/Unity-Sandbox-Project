@@ -14,9 +14,10 @@ public class TestPlaceOnGrid : MonoBehaviour
         // {
         //     if (_grid.IsCurrentCellOnGrid())
         //     {
-        //         Debug.Log("test");
+        //         Vector3 currentCellWorldPosition = _grid.GetCurrentSelectedCellWorldPosition();
         //     }
         // }
+        
     }
     
 }
