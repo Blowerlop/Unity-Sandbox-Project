@@ -12,60 +12,55 @@ public class Grid : MonoBehaviour
     #region Variables
     
     private int[,] _gridArray;
+    #if UNITY_EDITOR
     private TextMesh[,] _gridText;
+    #endif
 
     private Vector3 _originPosition;
+
     private Vector2 _currentSelectedCellIndexes;
-    private Vector3 _currentSelectedCellWorldPosition 
-        => GetCellWorldPosition((int)_currentSelectedCellIndexes.x, (int)_currentSelectedCellIndexes.y);
-    
+    private Camera _cam;
+    [SerializeField] private LayerMask _gridLayerMask;
+
+
     private Plane _plane;
 
     [SerializeField] private bool _drawGizmos;
 
+
     [Header("Grid Relative")]
     [SerializeField] [Min(1)] private int _width = 7;
+
     [SerializeField] [Min(1)] private int _depth = 10;
-    
+
+
     [Header("Cell Relative")]
     [SerializeField] [Min(1)] private Vector3 _size;
-    
-    
 
     #endregion
 
-    
+
     #region Updates
-    
+
     private void Start()
     {
         _originPosition = transform.position;
         _plane = new Plane(Vector3.up, _originPosition);
-        
+        _cam = Camera.main;
         InitializeAllGridRelative();
     }
 
-    [SerializeField] private LayerMask _gridLayerMask;
-    RaycastHit hit;
     void Update()
     {
-        Ray ray = Camera.main.ScreenPointToRay(InputManager.instance.mousePosition);
-        
-        if (_plane.Raycast(ray, out float distance))
-        {
-            Vector3 mouseWorldPosition = ray.GetPoint(distance);
-            
-            GetCellIndexes(mouseWorldPosition, out int x, out int z);
-            
-            if (x >= 0 && x < _width &&
-                z >= 0 && z < _depth)
-            {
-                _currentSelectedCellIndexes = new Vector2(x, z);
-            }
-            
-            // _currentSelectedCellIndexes = new Vector2(x, z);
-
-        }
+        // Ray ray = _cam.ScreenPointToRay(InputManager.instance.mousePosition);
+        //
+        // if (_plane.Raycast(ray, out float distance))
+        // {
+        //     Vector3 mouseWorldPosition = ray.GetPoint(distance);
+        //     
+        //     GetCellIndexes(mouseWorldPosition, out int x, out int z);
+        //     _currentSelectedCellIndexes = new Vector2(x, z);
+        // }
     }
 
     #endregion
@@ -80,15 +75,13 @@ public class Grid : MonoBehaviour
         GenerateCellsText();
     }
 
-    
-
-
     private void GenerateGrids()
     {
         _gridArray = new int[_width, _depth];
         _gridText = new TextMesh[_width, _depth];
     }
     
+    #if UNITY_EDITOR
     private void GenerateCellsText()
     {
         for (int x = 0; x < _gridArray.GetLength(0); x++)
@@ -101,6 +94,7 @@ public class Grid : MonoBehaviour
             }
         }
     }
+    #endif
 
     private IEnumerable<Vector3> EvaluateCellsWorldPosition()
     {
@@ -114,6 +108,12 @@ public class Grid : MonoBehaviour
             }
         }
     }
+
+    public Vector3 GetCurrentSelectedCellWorldPosition()
+    {
+        return GetCellWorldPosition((int)_currentSelectedCellIndexes.x, (int)_currentSelectedCellIndexes.y);
+        
+    }
     
     private Vector3 GetCellWorldPosition(int x, int z)
     {   
@@ -121,39 +121,42 @@ public class Grid : MonoBehaviour
         cellPosition = Vector3.Scale(cellPosition, _size) + new Vector3(_originPosition.x, _originPosition.y, _originPosition.z);
         return cellPosition;
     }
-    
-    private Vector3 GetCellWorldPosition(Vector3 mouseWorldPosition)
-    {
-        GetCellIndexes(mouseWorldPosition, out int x, out int z);
-        return GetCellWorldPosition(x, z);
-    }
-    
-
-    /*
-    private void SetText(int x, int z, string text)
-    {
-        _gridText[x, z].text = text;
-    }
-    */
 
     private void GetCellIndexes(Vector3 worldPosition, out int x, out int z)
     {
-        // private delegate int FloorToInt(float f);
-        //FloorToInt ezafaz = new FloorToInt(Mathf.FloorToInt);
-        // Maybe use a delegate instead of multiple functions call in a once
-        
-        // Need to make it work with a transform deplacement too
-        
-        x = Mathf.FloorToInt(worldPosition.x / _size.x ) - Mathf.FloorToInt(_originPosition.x / _size.x);
-        z = Mathf.FloorToInt(worldPosition.z / _size.z ) - Mathf.FloorToInt(_originPosition.z / _size.z);
+        x = Mathf.FloorToInt(worldPosition.x / _size.x - _originPosition.x / _size.x) ;
+        z = Mathf.FloorToInt(worldPosition.z / _size.z - _originPosition.z / _size.z) ;
     }
+
+    public bool IsCurrentCellOnGrid()
+    {
+        CheckCurrentCell();
+        
+        return _currentSelectedCellIndexes.x >= 0 && _currentSelectedCellIndexes.x < _width &&
+               _currentSelectedCellIndexes.y >= 0 && _currentSelectedCellIndexes.y < _depth;
+    }
+
+    private void CheckCurrentCell()
+    {
+        
+        Ray ray = _cam.ScreenPointToRay(InputManager.instance.mousePosition);
+        
+        if (_plane.Raycast(ray, out float distance))
+        {
+            Vector3 mouseWorldPosition = ray.GetPoint(distance);
+            
+            GetCellIndexes(mouseWorldPosition, out int x, out int z);
+            _currentSelectedCellIndexes = new Vector2(x, z);
+        }
+    }
+
     
     private void OnDrawGizmos()
     {
         if (_drawGizmos == false) return;
         
         GenerateGrids();
-
+        
         _originPosition = transform.position;
 
         // Draw Gizmos Cells
@@ -180,12 +183,15 @@ public class Grid : MonoBehaviour
         
         // Move the plane to fit the grid and fix the cells indexes detections
         _plane.SetNormalAndPosition(Vector3.up, new Vector3(0, _originPosition.y, 0));
-
-        x = _currentSelectedCellWorldPosition.x + (_size.x / 2);
-        y = _currentSelectedCellWorldPosition.y;
-        z = _currentSelectedCellWorldPosition.z + (_size.z / 2);
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawCube(new Vector3(x, y, z) , new Vector3(_size.x, 0.1f, _size.z));
+        
+        if (IsCurrentCellOnGrid() && InputManager.instance.isFiring)
+        {
+            x = GetCurrentSelectedCellWorldPosition().x + (_size.x / 2);
+            y = GetCurrentSelectedCellWorldPosition().y;
+            z = GetCurrentSelectedCellWorldPosition().z + (_size.z / 2);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawCube(new Vector3(x, y, z) , new Vector3(_size.x, 0.1f, _size.z));
+        }
     }
 
     
@@ -202,7 +208,7 @@ public class Grid : MonoBehaviour
     
     
     
-    public TextMesh CreateWorldText(string text, Transform parent = null, Vector3 localPosition = default(Vector3),
+    private TextMesh CreateWorldText(string text, Transform parent = null, Vector3 localPosition = default(Vector3),
         int fontSize = 40, Color? color = null, TextAnchor textAnchor = TextAnchor.UpperLeft, Vector3 rotation = default(Vector3), 
         TextAlignment textAlignment = TextAlignment.Left, int sortingOrder = 5000)
     {
@@ -212,7 +218,7 @@ public class Grid : MonoBehaviour
     }
     
     
-    public TextMesh CreateWorldText(Transform parent, string text, Vector3 localPosition, int fontSize, Color color,
+    private TextMesh CreateWorldText(Transform parent, string text, Vector3 localPosition, int fontSize, Color color,
         TextAnchor textAnchor, Vector3 rotation, TextAlignment textAlignment, int sortingOrder)
     {
         GameObject go = new GameObject("World Text", typeof(TextMesh));
