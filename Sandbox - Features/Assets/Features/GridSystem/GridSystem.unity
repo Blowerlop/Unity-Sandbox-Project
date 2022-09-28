@@ -678,10 +678,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a8153d116fb9d94e97f00608974b6c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _drawGizmos: 1
   _width: 3
   _depth: 3
   _size: {x: 20, y: 1, z: 20}
-  _drawGizmos: 1
 --- !u!4 &1884902592
 Transform:
   m_ObjectHideFlags: 0
