@@ -6,18 +6,22 @@ using UnityEngine;
 public class TestPlaceOnGrid : MonoBehaviour
 {
     [SerializeField] private Grid _grid;
-    
     private void Update()
     {
         
-        // if (InputManager.instance.isFiring)
-        // {
-        //     if (_grid.IsCurrentCellOnGrid())
-        //     {
-        //         Vector3 currentCellWorldPosition = _grid.GetCurrentSelectedCellWorldPosition();
-        //     }
-        // }
+        if (InputManager.instance.isFiring)
+        {
+            InputManager.instance.isFiring = false;
+            _grid.Clicked();
+
+            if (_grid.isClickedCellOnGrid)
+            {
+
+            }
+        }
         
     }
+
+
     
 }

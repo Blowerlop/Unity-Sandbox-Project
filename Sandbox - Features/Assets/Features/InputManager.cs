@@ -51,7 +51,7 @@ public class InputManager : MonoBehaviour
 
     public void OnUse(InputAction.CallbackContext context)
     {
-        isUsing = context.started;
+        isUsing = context.performed;
     }
 
     public void OnMousePosition(InputAction.CallbackContext context)

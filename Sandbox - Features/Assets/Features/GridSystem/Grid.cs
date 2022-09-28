@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
@@ -13,26 +14,32 @@ public class Grid : MonoBehaviour
 {
     #region Variables
 
+    // All grids relative
     private int[,] _gridArray;
 #if UNITY_EDITOR
     private TextMesh[,] _gridText;
 #endif
-
-
+    
+    // Try to sf the two dimensional array
+    [SerializeField] private GameObject goGameObject;
+    private GameObject[,] _gridData;
+    
     [SerializeField] private bool _drawGizmos;
 
     [Header("Grid Relative")] // CHOISIR AVEC GRID NORMAL
     [SerializeField] [Min(1)] private int _width = 7;
-
     [SerializeField] [Min(1)] private int _depth = 10;
-
-
+    
     [Header("Cell")]
     [SerializeField] [Min(1)] private Vector3 _size;
 
-    private Vector3 _gridOriginPosition;
-    private Vector2 _currentSelectedCellIndexes;
+    //
+    public Vector2 currentSelectedCellIndexes { get; private set; }
+    public bool isClickedCellOnGrid { get; private set; }
+    
+    // 
     private Camera _cam;
+    private Vector3 _gridOriginPosition;
     private Plane _plane;
 
     #endregion
@@ -42,9 +49,9 @@ public class Grid : MonoBehaviour
 
     private void Start()
     {
+        _cam = Camera.main;
         _gridOriginPosition = transform.position;
         _plane = new Plane(Vector3.up, _gridOriginPosition);
-        _cam = Camera.main;
         InitializeAllGridRelative();
     }
 
@@ -56,14 +63,32 @@ public class Grid : MonoBehaviour
     {
         // Generate grid array and grid text
         GenerateGrids();
-        
+        GenerateDataInGrid();
         GenerateCellsText();
     }
 
     private void GenerateGrids()
     {
         _gridArray = new int[_width, _depth];
+        _gridData = new GameObject[_width, _depth];
         _gridText = new TextMesh[_width, _depth];
+    }
+
+    private void GenerateDataInGrid()
+    {
+        _gridData[0, 1] = goGameObject;
+        
+        for (int x = 0; x < _gridArray.GetLength(0); x++)
+        {
+            for (int z = 0; z < _gridArray.GetLength(1); z++)
+            {
+                GameObject cellData = _gridData[x, z];
+                if (cellData != null)
+                {
+                    Instantiate(cellData, GetCellWorldPosition(x, z), Quaternion.identity);
+                }
+            }
+        }
     }
     
     #if UNITY_EDITOR
@@ -97,7 +122,7 @@ public class Grid : MonoBehaviour
 
     public Vector3 GetCurrentSelectedCellWorldPosition()
     {
-        return GetCellWorldPosition((int)_currentSelectedCellIndexes.x, (int)_currentSelectedCellIndexes.y);
+        return GetCellWorldPosition((int)currentSelectedCellIndexes.x, (int)currentSelectedCellIndexes.y);
         
     }
     
@@ -109,21 +134,19 @@ public class Grid : MonoBehaviour
         return cellPosition;
     }
 
-    private void GetCellIndexes(Vector3 worldPosition, out int x, out int z)
+    public void GetCellIndexes(Vector3 worldPosition, out int x, out int z)
     {
         x = Mathf.FloorToInt(worldPosition.x / _size.x - _gridOriginPosition.x / _size.x) ;
         z = Mathf.FloorToInt(worldPosition.z / _size.z - _gridOriginPosition.z / _size.z) ;
     }
 
-    public bool IsCurrentCellOnGrid()
+    private bool IsClickedCellOnGrid()
     {
-        CheckCurrentCell();
-        
-        return _currentSelectedCellIndexes.x >= 0 && _currentSelectedCellIndexes.x < _width &&
-               _currentSelectedCellIndexes.y >= 0 && _currentSelectedCellIndexes.y < _depth;
+        return currentSelectedCellIndexes.x >= 0 && currentSelectedCellIndexes.x < _width &&
+               currentSelectedCellIndexes.y >= 0 && currentSelectedCellIndexes.y < _depth;
     }
 
-    private void CheckCurrentCell()
+    public void Clicked()
     {
         Ray ray = _cam.ScreenPointToRay(InputManager.instance.mousePosition);
         
@@ -132,7 +155,8 @@ public class Grid : MonoBehaviour
             Vector3 mouseWorldPosition = ray.GetPoint(distance);
             
             GetCellIndexes(mouseWorldPosition, out int x, out int z);
-            _currentSelectedCellIndexes = new Vector2(x, z);
+            currentSelectedCellIndexes = new Vector2(x, z);
+            isClickedCellOnGrid = IsClickedCellOnGrid();
         }
     }
 
@@ -170,13 +194,15 @@ public class Grid : MonoBehaviour
         // Move the plane to fit the grid and fix the cells indexes detections
         _plane.SetNormalAndPosition(Vector3.up, new Vector3(0, _gridOriginPosition.y, 0));
 
-        // Draw where the mouse is
+        
+        // Highlight the cell we are on
         if (Application.isPlaying == false) return;
-        if (IsCurrentCellOnGrid() && InputManager.instance.isFiring)
+        if (IsClickedCellOnGrid())
         {
-            x = GetCurrentSelectedCellWorldPosition().x + (_size.x / 2);
-            y = GetCurrentSelectedCellWorldPosition().y;
-            z = GetCurrentSelectedCellWorldPosition().z + (_size.z / 2);
+            Vector3 currentCellWorldPosition = GetCurrentSelectedCellWorldPosition();
+            x = currentCellWorldPosition.x + (_size.x / 2);
+            y = currentCellWorldPosition.y;
+            z = currentCellWorldPosition.z + (_size.z / 2);
             Gizmos.color = Color.cyan;
             Gizmos.DrawCube(new Vector3(x, y, z) , new Vector3(_size.x, 0.1f, _size.z));
         }
