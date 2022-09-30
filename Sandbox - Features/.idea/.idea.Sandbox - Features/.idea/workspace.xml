@@ -41,7 +41,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "editor.preferences.fonts.default",
+    "settings.editor.selected.configurable": "CodeLensConfigurable",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -109,7 +109,8 @@
       <workItem from="1664323573539" duration="1253000" />
       <workItem from="1664324915630" duration="2563000" />
       <workItem from="1664357692865" duration="3300000" />
-      <workItem from="1664374191093" duration="4168000" />
+      <workItem from="1664374191093" duration="7363000" />
+      <workItem from="1664541523227" duration="11472000" />
     </task>
     <servers />
   </component>
