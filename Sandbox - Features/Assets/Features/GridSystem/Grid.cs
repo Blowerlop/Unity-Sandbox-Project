@@ -13,28 +13,32 @@ using Girod_Nathan.Utilities;
 public class Grid : MonoBehaviour
 {
     #region Variables
-    
-    [SerializeField] private bool _drawGizmos;
 
-    [Header("Grid Relative")]
-    [SerializeField] [Min(1)] private int _width = 7;
-    [SerializeField] [Min(1)] private int _depth = 10;
+    // All grids relative
     private int[,] _gridArray;
 #if UNITY_EDITOR
     private TextMesh[,] _gridText;
 #endif
+    
+    // Try to sf the two dimensional array
+    [SerializeField] private GameObject goGameObject;
+    private GameObject[,] _gridData;
+    
+    [SerializeField] private bool _drawGizmos;
 
-    [Header("Tile Relative")]
-    [SerializeField] private Tile _tileVisual;
+    [Header("Grid Relative")] // CHOISIR AVEC GRID NORMAL
+    [SerializeField] [Min(1)] private int _width = 7;
+    [SerializeField] [Min(1)] private int _depth = 10;
+    
+    [Header("Cell")]
     [SerializeField] [Min(1)] private Vector3 _size;
-    [Tooltip("The LayerMask that will permit the raycast to touch the tiles")]
-    [SerializeField] private LayerMask _tileLayerMask;
 
-    [Header("Reference")]
-    [Tooltip("The camera from which the raycast will start")]
-    [SerializeField] private Camera _cam;
-    [HideInInspector] public Tile[] _tiles { get; private set; }
-
+    //
+    public Vector2 currentSelectedCellIndexes { get; private set; }
+    public bool isClickedCellOnGrid { get; private set; }
+    
+    // 
+    private Camera _cam;
     private Vector3 _gridOriginPosition;
     private Plane _plane;
 
@@ -42,150 +46,140 @@ public class Grid : MonoBehaviour
 
 
     #region Updates
+
     private void Start()
     {
+        _cam = Camera.main;
         _gridOriginPosition = transform.position;
         _plane = new Plane(Vector3.up, _gridOriginPosition);
         InitializeAllGridRelative();
     }
+
     #endregion
-
-
-    #region Methods
     
+    
+    #region Methods
     private void InitializeAllGridRelative()
     {
         // Generate grid array and grid text
-        InitializeArrays();
-        GenerateTiles();
-        GenerateTilesText();
-        SpawnDataInTiles();
+        GenerateGrids();
+        GenerateDataInGrid();
+        GenerateCellsText();
     }
 
-    private void InitializeArrays()
+    private void GenerateGrids()
     {
         _gridArray = new int[_width, _depth];
+        _gridData = new GameObject[_width, _depth];
         _gridText = new TextMesh[_width, _depth];
-        _tiles = new Tile[_width * _depth];
     }
-    
-    private void GenerateTiles()
+
+    private void GenerateDataInGrid()
     {
-        // Create a parent for the tiles
+        _gridData[0, 1] = goGameObject;
         
-        Transform tilesParent = new GameObject("Tiles Visual").transform;
-        tilesParent.position = transform.position;
-
-        // Fit the tiles to the size of the grid
-        _tileVisual = Instantiate(_tileVisual);
-        _tileVisual.transform.localScale = _size;
-
-
-        // Spawn tiles
-        int index = 0; // To add in the _tiles array each tiles
-        foreach (var tileWorldPosition in EvaluateEachTilesWorldPosition())
+        for (int x = 0; x < _gridArray.GetLength(0); x++)
         {
-            Tile ins = Instantiate(_tileVisual, tileWorldPosition, Quaternion.identity, tilesParent);
-            ins.name = $"Tile {index}";
-            ins.worldPosition = tileWorldPosition;
-            
-            GetTileIndexes(tileWorldPosition, out int x, out int z);
-            ins.inGridIndexes = new Vector2(x, z);
-
-
-            _tiles[index] = ins;
-            index++;
-        }
-        
-        // Destroy the tile prefab copy, we just need the reference
-        Destroy(_tileVisual.gameObject);
-    }
-    
-    private void GenerateTilesText()
-    {
-        Transform tilesParent = new GameObject("Tiles Text").transform;
-        tilesParent.position = transform.position;
-
-        foreach (var tile in _tiles)
-        {
-            Vector2 indexes = tile.inGridIndexes;
-            int x = (int)indexes.x;
-            int z = (int)indexes.y;
-            
-            _gridText[x, z] = Utilities.CreateWorldText($"{x}, {z}", tilesParent, 
-                tile.transform.localPosition + _size * 0.5f, 30, Color.white,
-                TextAnchor.MiddleCenter, new Vector3(90, 0, 0));
-        }
-    }
-    
-    private void SpawnDataInTiles()
-    {
-        foreach (var tile in _tiles)
-        {
-            foreach (var data in tile.data)
+            for (int z = 0; z < _gridArray.GetLength(1); z++)
             {
-                Instantiate(data, tile.worldPosition, Quaternion.identity);
+                GameObject cellData = _gridData[x, z];
+                if (cellData != null)
+                {
+                    Instantiate(cellData, GetCellWorldPosition(x, z), Quaternion.identity);
+                }
             }
-            
         }
     }
-
-    private IEnumerable<Vector3> EvaluateEachTilesWorldPosition()
+    
+    #if UNITY_EDITOR
+    private void GenerateCellsText()
     {
         for (int x = 0; x < _gridArray.GetLength(0); x++)
         {
             for (int z = 0; z < _gridArray.GetLength(1); z++)
             {
-                Vector3 tilePosition = new Vector3(x, 0, z);
-                tilePosition = Vector3.Scale(tilePosition, _size) + // Adjust to the grid origin position
-                               new Vector3(_gridOriginPosition.x, _gridOriginPosition.y, _gridOriginPosition.z);
-                yield return tilePosition;
+                _gridText[x, z] = Utilities.CreateWorldText($"{x}, {z}", null, 
+                    GetCellWorldPosition(x, z) + _size * 0.5f, 30, Color.white,
+                    TextAnchor.MiddleCenter, new Vector3(90, 0, 0));
             }
         }
-        
+    }
+    #endif
+
+    private IEnumerable<Vector3> EvaluateCellsWorldPosition()
+    {
+        for (int x = 0; x < _gridArray.GetLength(0); x++)
+        {
+            for (int z = 0; z < _gridArray.GetLength(1); z++)
+            {
+                Vector3 cellPosition = new Vector3(x, 0, z);
+                cellPosition = Vector3.Scale(cellPosition, _size) + // Adjust to the grid origin position
+                               new Vector3(_gridOriginPosition.x, _gridOriginPosition.y, _gridOriginPosition.z);
+                yield return cellPosition;
+            }
+        }
     }
 
-    private void GetTileIndexes(Vector3 worldPosition, out int x, out int z)
+    public Vector3 GetCurrentSelectedCellWorldPosition()
+    {
+        return GetCellWorldPosition((int)currentSelectedCellIndexes.x, (int)currentSelectedCellIndexes.y);
+        
+    }
+    
+    private Vector3 GetCellWorldPosition(int x, int z)
+    {   
+        Vector3 cellPosition = new Vector3(x, 0, z);
+        cellPosition = Vector3.Scale(cellPosition, _size) + // Adjust to the grid origin position
+                       new Vector3(_gridOriginPosition.x, _gridOriginPosition.y, _gridOriginPosition.z);
+        return cellPosition;
+    }
+
+    public void GetCellIndexes(Vector3 worldPosition, out int x, out int z)
     {
         x = Mathf.FloorToInt(worldPosition.x / _size.x - _gridOriginPosition.x / _size.x) ;
         z = Mathf.FloorToInt(worldPosition.z / _size.z - _gridOriginPosition.z / _size.z) ;
     }
-    
-    public bool Raycast(out RaycastHit hitInfo)
+
+    private bool IsClickedCellOnGrid()
     {
-        // Get the distance between the camera and the grid (by the plane) according to the mouse world position
-        Ray ray = _cam.ScreenPointToRay(InputManager.instance.mousePosition);
-
-        float raycastDistance = 0;
-        if (_plane.Raycast(ray, out float distance))
-        { 
-            raycastDistance = distance;
-        }
-
-        // Shoot a ray from the camera to the grid according to the ray and the distance between them
-        return Physics.Raycast(ray, out hitInfo, raycastDistance, _tileLayerMask);
+        return currentSelectedCellIndexes.x >= 0 && currentSelectedCellIndexes.x < _width &&
+               currentSelectedCellIndexes.y >= 0 && currentSelectedCellIndexes.y < _depth;
     }
-    
+
+    public void Clicked()
+    {
+        Ray ray = _cam.ScreenPointToRay(InputManager.instance.mousePosition);
+        
+        if (_plane.Raycast(ray, out float distance))
+        {
+            Vector3 mouseWorldPosition = ray.GetPoint(distance);
+            
+            GetCellIndexes(mouseWorldPosition, out int x, out int z);
+            currentSelectedCellIndexes = new Vector2(x, z);
+            isClickedCellOnGrid = IsClickedCellOnGrid();
+        }
+    }
+
     private void OnDrawGizmos()
     {
         if (_drawGizmos == false) return;
         
-        InitializeArrays();
+        GenerateGrids();
         
         _gridOriginPosition = transform.position;
 
-        // Draw Gizmos Tiles
-        foreach (var tilePosition in EvaluateEachTilesWorldPosition())
+        // Draw Gizmos Cells
+        foreach (var cellPosition in EvaluateCellsWorldPosition())
         {
-            Gizmos.DrawLine(tilePosition, new Vector3(tilePosition.x + _size.x, tilePosition.y, tilePosition.z));
-            Gizmos.DrawLine(tilePosition, new Vector3(tilePosition.x, tilePosition.y, tilePosition.z + _size.z));
+            Gizmos.DrawLine(cellPosition, new Vector3(cellPosition.x + _size.x, cellPosition.y, cellPosition.z));
+            Gizmos.DrawLine(cellPosition, new Vector3(cellPosition.x, cellPosition.y, cellPosition.z + _size.z));
         }
 
         // Draw Gizmos top and right borders
         float x, y, z;
         // x origin
-        x = _width * _size.x + _gridOriginPosition.x;
-        z = _depth * _size.z + _gridOriginPosition.z;
+        x = _width * _size.z + _gridOriginPosition.x;
+        z = _depth * _size.x + _gridOriginPosition.z;
         Gizmos.DrawLine(
             new Vector3(x, _gridOriginPosition.y, _gridOriginPosition.z), 
             new Vector3(x, _gridOriginPosition.y, z)
@@ -197,24 +191,21 @@ public class Grid : MonoBehaviour
             new Vector3(_gridOriginPosition.x, _gridOriginPosition.y, z) 
             );
         
-        // Move the plane to fit the grid and fix the tiles indexes detections
+        // Move the plane to fit the grid and fix the cells indexes detections
         _plane.SetNormalAndPosition(Vector3.up, new Vector3(0, _gridOriginPosition.y, 0));
 
         
-        // Highlight the tile we are on
+        // Highlight the cell we are on
         if (Application.isPlaying == false) return;
-        
-        if (Raycast(out RaycastHit hitInfo))
+        if (IsClickedCellOnGrid())
         {
-            Vector3 currentTileWorldPosition = hitInfo.transform.GetComponentInParent<Tile>().worldPosition;
-            x = currentTileWorldPosition.x + (_size.x / 2);
-            y = currentTileWorldPosition.y;
-            z = currentTileWorldPosition.z + (_size.z / 2);
+            Vector3 currentCellWorldPosition = GetCurrentSelectedCellWorldPosition();
+            x = currentCellWorldPosition.x + (_size.x / 2);
+            y = currentCellWorldPosition.y;
+            z = currentCellWorldPosition.z + (_size.z / 2);
             Gizmos.color = Color.cyan;
             Gizmos.DrawCube(new Vector3(x, y, z) , new Vector3(_size.x, 0.1f, _size.z));
         }
-            
-        
     }
     #endregion
 }

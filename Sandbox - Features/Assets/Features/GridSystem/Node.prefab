@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 467429459109852167}
   - component: {fileID: 6610188108512670073}
   m_Layer: 7
-  m_Name: Tile Visual
+  m_Name: Node Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -106,9 +106,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3951080140402458882}
-  - component: {fileID: 6328210106070908017}
   m_Layer: 0
-  m_Name: Tile
+  m_Name: Node
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -123,25 +122,10 @@ Transform:
   m_GameObject: {fileID: 3901074646578589015}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 20, y: 0, z: 20}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2924696696375167527}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6328210106070908017
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3901074646578589015}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c0ce2c44b271e741b6230f8b3ebd94a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  worldPosition: {x: 0, y: 0, z: 0}
-  inGridIndexes: {x: 0, y: 0}
-  data: []
