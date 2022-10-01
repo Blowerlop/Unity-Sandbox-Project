@@ -384,6 +384,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _grid: {fileID: 1884902591}
+  _objectToPlaceTest: {fileID: 0}
 --- !u!4 &741322457
 Transform:
   m_ObjectHideFlags: 0
@@ -592,8 +593,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
-  m_LocalRotation: {x: -0.7130207, y: -0.0036078808, z: 0.003697882, w: -0.70112395}
-  m_LocalPosition: {x: 27.511507, y: 70.71413, z: 29.273018}
+  m_LocalRotation: {x: -0.579646, y: -0.0054170643, z: 0.003886538, w: -0.81484115}
+  m_LocalPosition: {x: 27.747976, y: 78.760254, z: 3.4026642}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -678,12 +679,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a8153d116fb9d94e97f00608974b6c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  goGameObject: {fileID: 3901074646578589015, guid: 22815b38630f8c84db6063aa907fce1d,
-    type: 3}
   _drawGizmos: 1
   _width: 3
   _depth: 3
+  _tileVisual: {fileID: 6328210106070908017, guid: 22815b38630f8c84db6063aa907fce1d,
+    type: 3}
   _size: {x: 20, y: 1, z: 20}
+  _tileLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _cam: {fileID: 961739752}
 --- !u!4 &1884902592
 Transform:
   m_ObjectHideFlags: 0
@@ -692,7 +697,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1884902590}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
