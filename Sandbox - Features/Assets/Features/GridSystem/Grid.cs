@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.ProBuilder.Shapes;
 using Plane = UnityEngine.Plane;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
@@ -29,11 +26,13 @@ public class Grid : MonoBehaviour
     [SerializeField] [Min(1)] private Vector3 _size;
     [Tooltip("The LayerMask that will permit the raycast to touch the tiles")]
     [SerializeField] private LayerMask _tileLayerMask;
+    private Tile[] _tiles;
+
 
     [Header("Reference")]
     [Tooltip("The camera from which the raycast will start")]
     [SerializeField] private Camera _cam;
-    [HideInInspector] public Tile[] _tiles { get; private set; }
+
 
     private Vector3 _gridOriginPosition;
     private Plane _plane;
@@ -182,10 +181,9 @@ public class Grid : MonoBehaviour
         }
 
         // Draw Gizmos top and right borders
-        float x, y, z;
         // x origin
-        x = _width * _size.x + _gridOriginPosition.x;
-        z = _depth * _size.z + _gridOriginPosition.z;
+        float x = _width * _size.x + _gridOriginPosition.x;
+        float z = _depth * _size.z + _gridOriginPosition.z;
         Gizmos.DrawLine(
             new Vector3(x, _gridOriginPosition.y, _gridOriginPosition.z), 
             new Vector3(x, _gridOriginPosition.y, z)
@@ -208,7 +206,7 @@ public class Grid : MonoBehaviour
         {
             Vector3 currentTileWorldPosition = hitInfo.transform.GetComponentInParent<Tile>().worldPosition;
             x = currentTileWorldPosition.x + (_size.x / 2);
-            y = currentTileWorldPosition.y;
+            float y = currentTileWorldPosition.y;
             z = currentTileWorldPosition.z + (_size.z / 2);
             Gizmos.color = Color.cyan;
             Gizmos.DrawCube(new Vector3(x, y, z) , new Vector3(_size.x, 0.1f, _size.z));
