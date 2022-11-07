@@ -100,6 +100,7 @@ public class Grid : MonoBehaviour
         Destroy(_tileVisual.gameObject);
     }
     
+    #if UNITY_EDITOR
     private void GenerateTilesText()
     {
         Transform tilesParent = new GameObject("Tiles Text").transform;
@@ -116,6 +117,7 @@ public class Grid : MonoBehaviour
                 TextAnchor.MiddleCenter, new Vector3(90, 0, 0));
         }
     }
+    #endif
     
     private void SpawnDataInTiles()
     {

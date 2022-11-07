@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
@@ -19,8 +20,8 @@ public class PlayerGrabObjets : MonoBehaviour
     [SerializeField] private float _dropForce = 5.0f;
 
     // Grabbed Target velocity relative
-    private Vector3 _velocityOffset = new Vector3(0.1f, 0.1f, 0.1f);
-    private Vector3 _angularVelocityOffset = new Vector3(0.1f, 0.1f, 0.1f);
+    private float _minimumVelocity = 0.0f;
+    private float _velocityOffset = 0.1f;
 
     [Header("Links")]
     [SerializeField] private Transform _camera;
@@ -94,12 +95,21 @@ public class PlayerGrabObjets : MonoBehaviour
     private void MoveGrabbedTarget()
     {
         Vector3 targetPosition = Vector3.Lerp(_grabbedTarget.position, _grabPoint.position, Time.fixedDeltaTime * 10);
+        
+        Vector3 targetVelocity = _grabbedTarget.velocity;
+        Vector3 targetAngularVelocity = _grabbedTarget.angularVelocity;
+        LerpResetVelocity(ref targetVelocity);
+        LerpResetVelocity(ref targetAngularVelocity);
+        
+        _grabbedTarget.velocity = targetVelocity;
+        _grabbedTarget.angularVelocity = targetAngularVelocity;
 
-        Vector3 velocity = _grabbedTarget.velocity;
-        Vector3 angularVelocity = _grabbedTarget.angularVelocity;
+        _grabbedTarget.MovePosition(targetPosition);
+    }
 
-
-        if (velocity.normalized != Vector3.zero + _velocityOffset)
+    private void LerpResetVelocity(ref Vector3 velocity)
+    {
+        if (velocity.magnitude < _minimumVelocity - 0.1f || velocity.magnitude > _minimumVelocity + _velocityOffset)
         {
             velocity = Vector3.Lerp(_grabbedTarget.velocity, Vector3.zero, Time.deltaTime * 10.0f);
         }
@@ -107,27 +117,18 @@ public class PlayerGrabObjets : MonoBehaviour
         {
             velocity = Vector3.zero;
         }
-
-        if (angularVelocity.normalized != Vector3.zero + _angularVelocityOffset)
-        {
-            angularVelocity = Vector3.Lerp(_grabbedTarget.angularVelocity, Vector3.zero, Time.deltaTime * 10.0f);
-
-        }
-        else
-        {
-            angularVelocity = Vector3.zero;
-        }
-
-
-        _grabbedTarget.velocity = velocity;
-        _grabbedTarget.angularVelocity = angularVelocity;
-
-        _grabbedTarget.MovePosition(targetPosition);
     }
 
     private void EnableGrabUI(bool state)
     {
         _grabUI.SetActive(state);
     }
+
+
+    private void OnCollisionStay(Collision collision)
+    {
+        Debug.Log("test");
+    }
+
     #endregion
 }

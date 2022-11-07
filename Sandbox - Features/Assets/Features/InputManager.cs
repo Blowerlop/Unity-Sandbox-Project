@@ -26,17 +26,21 @@ public class InputManager : MonoBehaviour
     public void OnMove(InputAction.CallbackContext context)
     {
         move = context.ReadValue<Vector2>();
+        
     }
 
     public void OnLook(InputAction.CallbackContext context)
     {
         look = context.ReadValue<Vector2>();
-        
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
         isJumping = context.started;
+        if (context.action.WasPressedThisFrame())
+        {
+            Debug.Log("Use once");
+        }
     }
 
     public void OnSprint(InputAction.CallbackContext context)
@@ -51,7 +55,8 @@ public class InputManager : MonoBehaviour
 
     public void OnUse(InputAction.CallbackContext context)
     {
-        isUsing = context.performed;
+        isUsing = context.action.IsPressed();
+
     }
 
     public void OnMousePosition(InputAction.CallbackContext context)

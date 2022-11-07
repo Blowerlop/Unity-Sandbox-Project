@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2768639808124782175}
   - component: {fileID: 2768639808124782174}
-  - component: {fileID: 2768639808124782168}
   - component: {fileID: 2768639808124782169}
   - component: {fileID: 2768639808124782172}
   m_Layer: 3
@@ -66,23 +65,6 @@ MonoBehaviour:
   CinemachineCameraTarget: {fileID: 2768639809551349282}
   TopClamp: 90
   BottomClamp: -90
---- !u!114 &2768639808124782168
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2768639808124782171}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 09d09ce9d2b193948bb514ef26fd3ccf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  move: {x: 0, y: 0}
-  look: {x: 0, y: 0}
-  isJumping: 0
-  isSprinting: 0
-  isFiring: 0
 --- !u!114 &2768639808124782169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -111,7 +93,7 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2768639808124782168}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
         m_MethodName: OnMove
         m_Mode: 0
@@ -127,7 +109,7 @@ MonoBehaviour:
     m_ActionName: Player/Move[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2768639808124782168}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
         m_MethodName: OnLook
         m_Mode: 0
@@ -143,7 +125,7 @@ MonoBehaviour:
     m_ActionName: Player/Look[/Mouse/delta]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2768639808124782168}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
         m_MethodName: OnFire
         m_Mode: 0
@@ -159,7 +141,7 @@ MonoBehaviour:
     m_ActionName: Player/Fire[/Mouse/leftButton]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2768639808124782168}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
         m_MethodName: OnJump
         m_Mode: 0
@@ -175,7 +157,7 @@ MonoBehaviour:
     m_ActionName: Player/Jump[/Keyboard/space]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2768639808124782168}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
         m_MethodName: OnSprint
         m_Mode: 0
@@ -189,6 +171,14 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 11927b05-326a-4634-9935-aef384d0e90b
     m_ActionName: Player/Sprint[/Keyboard/shift]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 57eb424b-6119-4943-bd68-5c9a4ec005ce
+    m_ActionName: Player/Use[/Keyboard/e]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 9f3484ad-f78e-4fab-9714-98d68687edeb
+    m_ActionName: Player/MousePosition[/Mouse/position]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player

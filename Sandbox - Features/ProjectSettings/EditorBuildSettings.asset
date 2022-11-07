@@ -8,4 +8,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Features/GridSystem/GridSystem.unity
     guid: f024e9f584d8b93488f86036ed788e4b
+  - enabled: 1
+    path: Assets/Features/Project Initilization/Scenes/Loading.unity
+    guid: 66222ee6302d2754a91fc0a8c4db37c1
+  - enabled: 1
+    path: Assets/Features/Project Initilization/Scenes/azfazfazf.unity
+    guid: b22b08220c1af8e4986af3fe6438c68f
   m_configObjects: {}
